@@ -2,16 +2,15 @@ import { useState } from "react";
 import axios from "axios";
 
 function App() {
-  const [prompt, setPrompt] = useState(
-    "Write a very short kids story about avatars."
-  );
+  const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // if (!prompt.trim()) return;
+    setLoading(true); // Set loading to true when API call starts
+    setResponse(""); // Optionally clear the previous response
 
     try {
       const res = await axios.post("http://localhost:11434/api/chat", {
@@ -19,18 +18,18 @@ function App() {
         messages: [
           {
             role: "user",
-            content: "Write a very short kids story about avatars.",
+            content: prompt,
           },
         ],
         stream: false,
       });
 
-      // console.log("RESPONSE : ", res.data.message.content);
-      setResponse(res.data.message.content);
-
+      setResponse(res.data.message.content); // Set the response when data is fetched
     } catch (error) {
       console.error("Error connecting to Ollama API:", error);
       setResponse("Error: Unable to fetch response from Llama.");
+    } finally {
+      setLoading(false); // Set loading to false once the API call is done
     }
   };
 
@@ -49,8 +48,9 @@ function App() {
         <button
           type="submit"
           style={{ marginTop: "1rem", padding: "0.5rem 1rem" }}
+          disabled={loading} // Disable button when loading
         >
-          Send
+          {loading ? "Loading..." : "Send"}
         </button>
       </form>
       <div style={{ marginTop: "2rem" }}>
